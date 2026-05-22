@@ -211,18 +211,6 @@ Public Class frmMainDashboard
         LoadDashboardData ' Refresh after closing
     End Sub
 
-    Private Sub btnPurchase_Click(sender As Object, e As EventArgs)
-        Dim frmPurch As New frmPurchase
-        frmPurch.CurrentUserID = CurrentUserID
-        frmPurch.ShowDialog()
-    End Sub
-
-    Private Sub btnProducts_Click(sender As Object, e As EventArgs)
-        Dim frmProd As New frmProducts
-        frmProd.ShowDialog()
-        LoadDashboardData()
-    End Sub
-
     Private Sub btnCustomers_Click(sender As Object, e As EventArgs) Handles btnCustomers.Click
         Dim frmCust As New frmCustomers
         frmCust.ShowDialog

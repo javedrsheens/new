@@ -23,30 +23,30 @@ Public Class frmSettings
     Private Sub CreateSettingsTableIfMissing()
         Using conn As New MySqlConnection(connectionString)
             conn.Open()
-            Dim sql As String = "CREATE TABLE IF NOT EXISTS settings (KeyName VARCHAR(100) PRIMARY KEY, KeyValue TEXT, UpdatedOn DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)"
+            Dim sql As String = "CREATE TABLE IF NOT EXISTS settings (SettingID INT AUTO_INCREMENT PRIMARY KEY, SettingKey VARCHAR(100) NOT NULL, SettingValue TEXT NULL, CreatedDate DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, UpdatedDate DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, UNIQUE KEY uq_settings_key (SettingKey))"
             Using cmd As New MySqlCommand(sql, conn)
                 cmd.ExecuteNonQuery()
             End Using
         End Using
     End Sub
 
-    Private Function GetSettingValue(keyName As String) As String
+    Private Function GetSettingValue(settingKey As String) As String
         Using conn As New MySqlConnection(connectionString)
             conn.Open()
-            Using cmd As New MySqlCommand("SELECT KeyValue FROM settings WHERE KeyName=@KeyName LIMIT 1", conn)
-                cmd.Parameters.AddWithValue("@KeyName", keyName)
+            Using cmd As New MySqlCommand("SELECT SettingValue FROM settings WHERE SettingKey=@SettingKey LIMIT 1", conn)
+                cmd.Parameters.AddWithValue("@SettingKey", settingKey)
                 Dim result = cmd.ExecuteScalar()
-                Return If(result Is Nothing, String.Empty, result.ToString())
+                Return If(result Is Nothing OrElse IsDBNull(result), String.Empty, result.ToString())
             End Using
         End Using
     End Function
 
-    Private Sub SaveSettingValue(keyName As String, keyValue As String)
+    Private Sub SaveSettingValue(settingKey As String, settingValue As String)
         Using conn As New MySqlConnection(connectionString)
             conn.Open()
-            Using cmd As New MySqlCommand("INSERT INTO settings (KeyName, KeyValue) VALUES (@KeyName, @KeyValue) ON DUPLICATE KEY UPDATE KeyValue=@KeyValue, UpdatedOn=NOW()", conn)
-                cmd.Parameters.AddWithValue("@KeyName", keyName)
-                cmd.Parameters.AddWithValue("@KeyValue", keyValue)
+            Using cmd As New MySqlCommand("INSERT INTO settings (SettingKey, SettingValue) VALUES (@SettingKey, @SettingValue) ON DUPLICATE KEY UPDATE SettingValue=@SettingValue, UpdatedDate=NOW()", conn)
+                cmd.Parameters.AddWithValue("@SettingKey", settingKey)
+                cmd.Parameters.AddWithValue("@SettingValue", settingValue)
                 cmd.ExecuteNonQuery()
             End Using
         End Using

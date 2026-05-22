@@ -12,6 +12,9 @@ Public Class frmInvoicePrint
     Private invoiceItems As DataTable
     Private currentFormat As String = "Thermal 80mm"
     Private invoiceText As String = ""
+    Private companyDisplayName As String = "My Store"
+    Private companyDisplayAddress As String = ""
+    Private companyDisplayPhone As String = ""
 
     ' ================================================
     ' CONSTRUCTOR
@@ -70,6 +73,20 @@ Public Class frmInvoicePrint
         Try
             Using conn As New MySqlConnection(connectionString)
                 conn.Open()
+
+                ' Load company settings
+                Dim settingsSql As String = "SELECT SettingKey, SettingValue FROM settings WHERE SettingKey IN ('CompanyName','CompanyAddress','CompanyPhone')"
+                Using settingsCmd As New MySqlCommand(settingsSql, conn)
+                    Using dr As MySqlDataReader = settingsCmd.ExecuteReader()
+                        Do While dr.Read()
+                            Select Case dr.GetString(0)
+                                Case "CompanyName" : companyDisplayName = If(dr.IsDBNull(1), "My Store", dr.GetString(1))
+                                Case "CompanyAddress" : companyDisplayAddress = If(dr.IsDBNull(1), "", dr.GetString(1))
+                                Case "CompanyPhone" : companyDisplayPhone = If(dr.IsDBNull(1), "", dr.GetString(1))
+                            End Select
+                        Loop
+                    End Using
+                End Using
 
                 ' Get header
                 Dim headerQuery As String = "SELECT 
@@ -217,8 +234,11 @@ Public Class frmInvoicePrint
 
             ' Header - 40 chars wide for 80mm
             inv.AppendLine("========================================")
-            inv.AppendLine("       YOUR STORE NAME")
+            Dim centered80 As String = companyDisplayName.PadLeft((40 + companyDisplayName.Length) \ 2).PadRight(40)
+            inv.AppendLine(centered80)
             inv.AppendLine("     Point of Sale System")
+            If Not String.IsNullOrWhiteSpace(companyDisplayAddress) Then inv.AppendLine($"     {companyDisplayAddress}")
+            If Not String.IsNullOrWhiteSpace(companyDisplayPhone) Then inv.AppendLine($"     Tel: {companyDisplayPhone}")
             inv.AppendLine("========================================")
             inv.AppendLine("")
             inv.AppendLine($"Invoice:   {invoiceNo}")
@@ -302,7 +322,9 @@ Public Class frmInvoicePrint
             End If
 
             inv.AppendLine("==============================")
-            inv.AppendLine("     YOUR STORE NAME")
+            Dim centered58 As String = companyDisplayName.PadLeft((30 + companyDisplayName.Length) \ 2).PadRight(30)
+            inv.AppendLine(centered58)
+            If Not String.IsNullOrWhiteSpace(companyDisplayPhone) Then inv.AppendLine($"  Tel: {companyDisplayPhone}")
             inv.AppendLine("==============================")
             inv.AppendLine("")
             inv.AppendLine($"Inv:  {invoiceHeader("InvoiceNo")}")
@@ -359,10 +381,16 @@ Public Class frmInvoicePrint
             End If
 
             inv.AppendLine("================================================================================")
-            inv.AppendLine("                              YOUR STORE NAME")
+            Dim centeredA4 As String = companyDisplayName.PadLeft((80 + companyDisplayName.Length) \ 2).PadRight(80)
+            inv.AppendLine(centeredA4)
             inv.AppendLine("                          Point of Sale System")
-            inv.AppendLine("                    Address: Your Store Address")
-            inv.AppendLine("                    Phone: +91-XXXXXXXXXX")
+            If Not String.IsNullOrWhiteSpace(companyDisplayAddress) Then
+                Dim addrLine As String = $"                    Address: {companyDisplayAddress}"
+                inv.AppendLine(addrLine)
+            End If
+            If Not String.IsNullOrWhiteSpace(companyDisplayPhone) Then
+                inv.AppendLine($"                    Phone: {companyDisplayPhone}")
+            End If
             inv.AppendLine("================================================================================")
             inv.AppendLine("")
             inv.AppendLine("                              TAX INVOICE")
@@ -456,7 +484,7 @@ Public Class frmInvoicePrint
             inv.AppendLine($"Payment: {invoiceHeader("PaymentMethod")}")
             inv.AppendLine("")
             inv.AppendLine("Best Regards,")
-            inv.AppendLine("Your Store Name")
+            inv.AppendLine(companyDisplayName)
 
         Catch ex As Exception
             inv.AppendLine($"ERROR: {ex.Message}")

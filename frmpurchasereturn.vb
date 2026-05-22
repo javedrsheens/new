@@ -305,6 +305,21 @@ Public Class frmpurchasereturn
 
 #Region "Save Return"
 
+    Private Function GetOrCreateAccountID(conn As MySqlConnection, tran As MySqlTransaction, accountCode As String, accountName As String, accountType As String) As Integer
+        Using cmd As New MySqlCommand("SELECT AccountID FROM accounts WHERE AccountName = @AccountName LIMIT 1", conn, tran)
+            cmd.Parameters.AddWithValue("@AccountName", accountName)
+            Dim result = cmd.ExecuteScalar()
+            If result IsNot Nothing Then Return Convert.ToInt32(result)
+        End Using
+        Using cmd As New MySqlCommand("INSERT INTO accounts (AccountCode, AccountName, AccountType, ParentAccountID, OpeningBalance, IsActive, CreatedDate) VALUES (@AccountCode, @AccountName, @AccountType, NULL, 0, 1, NOW())", conn, tran)
+            cmd.Parameters.AddWithValue("@AccountCode", accountCode)
+            cmd.Parameters.AddWithValue("@AccountName", accountName)
+            cmd.Parameters.AddWithValue("@AccountType", accountType)
+            cmd.ExecuteNonQuery()
+            Return Convert.ToInt32(cmd.LastInsertedId)
+        End Using
+    End Function
+
     Private Sub btnSave_Click(sender As Object, e As EventArgs) Handles btnSave.Click
         If Not ValidateSave() Then Return
 
@@ -369,6 +384,44 @@ Public Class frmpurchasereturn
                         daybook.Parameters.AddWithValue("@PayM", "Return")
                         daybook.Parameters.AddWithValue("@UID", CurrentUserID)
                         daybook.ExecuteNonQuery()
+
+                        ' Journal entries (Debit Accounts Payable / Credit Inventory)
+                        Dim apAccountID As Integer = GetOrCreateAccountID(conn, tran, "2000", "Accounts Payable", "Liability")
+                        Dim invAccountID As Integer = GetOrCreateAccountID(conn, tran, "1200", "Inventory", "Asset")
+
+                        Dim journalCmd As New MySqlCommand(
+                            "INSERT INTO journal_entries (EntryDate, Description, ReferenceType, ReferenceID, UserID) " &
+                            "VALUES (@EntryDate, @Description, 'Purchase Return', @ReferenceID, @UserID)", conn, tran)
+                        journalCmd.Parameters.AddWithValue("@EntryDate", dtpPurchaseDate.Value)
+                        journalCmd.Parameters.AddWithValue("@Description", $"Purchase Return {txtPurchaseNo.Text}")
+                        journalCmd.Parameters.AddWithValue("@ReferenceID", returnID)
+                        journalCmd.Parameters.AddWithValue("@UserID", CurrentUserID)
+                        journalCmd.ExecuteNonQuery()
+                        Dim journalID As Long = journalCmd.LastInsertedId
+
+                        Dim detailCmd As New MySqlCommand(
+                            "INSERT INTO journal_details (JournalID, AccountID, DebitAmount, CreditAmount, Description) " &
+                            "VALUES (@JournalID, @AccountID, @DebitAmount, @CreditAmount, @Description)", conn, tran)
+                        detailCmd.Parameters.Add("@JournalID", MySqlDbType.Int64)
+                        detailCmd.Parameters.Add("@AccountID", MySqlDbType.Int32)
+                        detailCmd.Parameters.Add("@DebitAmount", MySqlDbType.Decimal)
+                        detailCmd.Parameters.Add("@CreditAmount", MySqlDbType.Decimal)
+                        detailCmd.Parameters.Add("@Description", MySqlDbType.VarChar)
+
+                        ' Debit Accounts Payable (reduce liability — supplier owes us refund)
+                        detailCmd.Parameters("@JournalID").Value = journalID
+                        detailCmd.Parameters("@AccountID").Value = apAccountID
+                        detailCmd.Parameters("@DebitAmount").Value = calculatedNetTotal
+                        detailCmd.Parameters("@CreditAmount").Value = 0D
+                        detailCmd.Parameters("@Description").Value = $"Purchase Return {txtPurchaseNo.Text} - AP"
+                        detailCmd.ExecuteNonQuery()
+
+                        ' Credit Inventory (stock leaving inventory)
+                        detailCmd.Parameters("@AccountID").Value = invAccountID
+                        detailCmd.Parameters("@DebitAmount").Value = 0D
+                        detailCmd.Parameters("@CreditAmount").Value = calculatedNetTotal
+                        detailCmd.Parameters("@Description").Value = $"Purchase Return {txtPurchaseNo.Text} - Inventory"
+                        detailCmd.ExecuteNonQuery()
 
                         ' Activity log
                         Dim log As New MySqlCommand(
