@@ -332,4 +332,74 @@ Public Class frmMainDashboard
         frmpnl.ShowDialog()
         LoadDashboardData() ' ✅ Refresh dashboard after closing P&L form
     End Sub
+
+    ' ============================================
+    ' TOOLBAR BUTTON HANDLERS (Button6/8/10/11/12)
+    ' ============================================
+
+    Private Sub Button6_Click(sender As Object, e As EventArgs) Handles Button6.Click
+        If MessageBox.Show("Are you sure you want to exit?", "Confirm Exit", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes Then
+            Application.Exit()
+        End If
+    End Sub
+
+    Private Sub Button8_Click(sender As Object, e As EventArgs) Handles Button8.Click
+        LoadDashboardData()
+        MessageBox.Show("Dashboard refreshed!", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information)
+    End Sub
+
+    Private Sub Button10_Click(sender As Object, e As EventArgs) Handles Button10.Click
+        Dim frmSet As New frmSettings
+        frmSet.ShowDialog()
+    End Sub
+
+    Private Sub Button11_Click(sender As Object, e As EventArgs) Handles Button11.Click
+        Dim frmDay As New frmDayBook
+        frmDay.ShowDialog()
+    End Sub
+
+    Private Sub Button12_Click(sender As Object, e As EventArgs) Handles Button12.Click
+        Dim frmUsr As New frmUsers
+        frmUsr.ShowDialog()
+    End Sub
+
+    ' ============================================
+    ' NEW MODULE NAVIGATION
+    ' ============================================
+
+    Public Sub OpenSalesReturn()
+        Dim frmSR As New frmSalesReturn
+        frmSR.CurrentUserID = CurrentUserID
+        frmSR.ShowDialog()
+        LoadDashboardData()
+    End Sub
+
+    Public Sub OpenSubcategories()
+        Dim frmSub As New frmSubcategories
+        frmSub.ShowDialog()
+    End Sub
+
+    Public Sub OpenStockTracking()
+        Dim frmST As New frmStockTracking
+        frmST.CurrentUserID = CurrentUserID
+        frmST.ShowDialog()
+    End Sub
+
+    Public Sub OpenProductHistory()
+        Dim frmPH As New frmProductHistory
+        frmPH.CurrentUserID = CurrentUserID
+        frmPH.ShowDialog()
+    End Sub
+
+    Public Sub OpenTrialBalance()
+        Dim frmTB As New frmTrialBalance
+        frmTB.CurrentUserID = CurrentUserID
+        frmTB.ShowDialog()
+    End Sub
+
+    Public Sub OpenPurchaseOrder()
+        Dim frmPO As New frmPurchaseOrder
+        frmPO.CurrentUserID = CurrentUserID
+        frmPO.ShowDialog()
+    End Sub
 End Class
