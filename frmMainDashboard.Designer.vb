@@ -90,6 +90,12 @@ Partial Class frmMainDashboard
         Button11 = New Button()
         Button12 = New Button()
         btnAccounts = New Button()
+        btnSalesReturn = New Button()
+        btnSubcategories = New Button()
+        btnStockTracking = New Button()
+        btnProductHistory = New Button()
+        btnTrialBalance = New Button()
+        btnPurchaseOrder = New Button()
         CType(dgvLowStock, ComponentModel.ISupportInitialize).BeginInit()
         Panel1.SuspendLayout()
         Panel2.SuspendLayout()
@@ -701,12 +707,19 @@ Partial Class frmMainDashboard
         TableLayoutPanel2.Controls.Add(Button11, 7, 0)
         TableLayoutPanel2.Controls.Add(Button12, 8, 0)
         TableLayoutPanel2.Controls.Add(btnAccounts, 1, 0)
+        TableLayoutPanel2.Controls.Add(btnSalesReturn, 0, 1)
+        TableLayoutPanel2.Controls.Add(btnSubcategories, 1, 1)
+        TableLayoutPanel2.Controls.Add(btnStockTracking, 2, 1)
+        TableLayoutPanel2.Controls.Add(btnProductHistory, 3, 1)
+        TableLayoutPanel2.Controls.Add(btnTrialBalance, 4, 1)
+        TableLayoutPanel2.Controls.Add(btnPurchaseOrder, 5, 1)
         TableLayoutPanel2.Dock = DockStyle.Bottom
-        TableLayoutPanel2.Location = New Point(0, 619)
+        TableLayoutPanel2.Location = New Point(0, 554)
         TableLayoutPanel2.Name = "TableLayoutPanel2"
-        TableLayoutPanel2.RowCount = 1
-        TableLayoutPanel2.RowStyles.Add(New RowStyle(SizeType.Percent, 100F))
-        TableLayoutPanel2.Size = New Size(1284, 65)
+        TableLayoutPanel2.RowCount = 2
+        TableLayoutPanel2.RowStyles.Add(New RowStyle(SizeType.Percent, 50F))
+        TableLayoutPanel2.RowStyles.Add(New RowStyle(SizeType.Percent, 50F))
+        TableLayoutPanel2.Size = New Size(1284, 130)
         TableLayoutPanel2.TabIndex = 17
         ' 
         ' btnPaymentMethods
@@ -830,6 +843,72 @@ Partial Class frmMainDashboard
         btnAccounts.Text = "Add Account"
         btnAccounts.UseVisualStyleBackColor = False
         ' 
+        ' btnSalesReturn
+        ' 
+        btnSalesReturn.BackColor = Color.FromArgb(CByte(233), CByte(30), CByte(99))
+        btnSalesReturn.Font = New Font("Segoe UI Semibold", 10F, FontStyle.Bold)
+        btnSalesReturn.ForeColor = Color.White
+        btnSalesReturn.Name = "btnSalesReturn"
+        btnSalesReturn.Size = New Size(100, 55)
+        btnSalesReturn.TabIndex = 30
+        btnSalesReturn.Text = "Sales" & vbCrLf & "Return"
+        btnSalesReturn.UseVisualStyleBackColor = False
+        ' 
+        ' btnSubcategories
+        ' 
+        btnSubcategories.BackColor = Color.FromArgb(CByte(63), CByte(81), CByte(181))
+        btnSubcategories.Font = New Font("Segoe UI Semibold", 10F, FontStyle.Bold)
+        btnSubcategories.ForeColor = Color.White
+        btnSubcategories.Name = "btnSubcategories"
+        btnSubcategories.Size = New Size(100, 55)
+        btnSubcategories.TabIndex = 31
+        btnSubcategories.Text = "Sub" & vbCrLf & "Categories"
+        btnSubcategories.UseVisualStyleBackColor = False
+        ' 
+        ' btnStockTracking
+        ' 
+        btnStockTracking.BackColor = Color.FromArgb(CByte(0), CByte(121), CByte(107))
+        btnStockTracking.Font = New Font("Segoe UI Semibold", 10F, FontStyle.Bold)
+        btnStockTracking.ForeColor = Color.White
+        btnStockTracking.Name = "btnStockTracking"
+        btnStockTracking.Size = New Size(100, 55)
+        btnStockTracking.TabIndex = 32
+        btnStockTracking.Text = "Stock" & vbCrLf & "Tracking"
+        btnStockTracking.UseVisualStyleBackColor = False
+        ' 
+        ' btnProductHistory
+        ' 
+        btnProductHistory.BackColor = Color.FromArgb(CByte(245), CByte(124), CByte(0))
+        btnProductHistory.Font = New Font("Segoe UI Semibold", 10F, FontStyle.Bold)
+        btnProductHistory.ForeColor = Color.White
+        btnProductHistory.Name = "btnProductHistory"
+        btnProductHistory.Size = New Size(100, 55)
+        btnProductHistory.TabIndex = 33
+        btnProductHistory.Text = "Product" & vbCrLf & "History"
+        btnProductHistory.UseVisualStyleBackColor = False
+        ' 
+        ' btnTrialBalance
+        ' 
+        btnTrialBalance.BackColor = Color.FromArgb(CByte(21), CByte(101), CByte(192))
+        btnTrialBalance.Font = New Font("Segoe UI Semibold", 10F, FontStyle.Bold)
+        btnTrialBalance.ForeColor = Color.White
+        btnTrialBalance.Name = "btnTrialBalance"
+        btnTrialBalance.Size = New Size(100, 55)
+        btnTrialBalance.TabIndex = 34
+        btnTrialBalance.Text = "Trial" & vbCrLf & "Balance"
+        btnTrialBalance.UseVisualStyleBackColor = False
+        ' 
+        ' btnPurchaseOrder
+        ' 
+        btnPurchaseOrder.BackColor = Color.FromArgb(CByte(74), CByte(20), CByte(140))
+        btnPurchaseOrder.Font = New Font("Segoe UI Semibold", 10F, FontStyle.Bold)
+        btnPurchaseOrder.ForeColor = Color.White
+        btnPurchaseOrder.Name = "btnPurchaseOrder"
+        btnPurchaseOrder.Size = New Size(100, 55)
+        btnPurchaseOrder.TabIndex = 35
+        btnPurchaseOrder.Text = "Purchase" & vbCrLf & "Order"
+        btnPurchaseOrder.UseVisualStyleBackColor = False
+        ' 
         ' frmMainDashboard
         ' 
         AutoScaleDimensions = New SizeF(7F, 15F)
@@ -939,4 +1018,10 @@ Partial Class frmMainDashboard
     Friend WithEvents Button10 As Button
     Friend WithEvents Button11 As Button
     Friend WithEvents Button12 As Button
+    Friend WithEvents btnSalesReturn As Button
+    Friend WithEvents btnSubcategories As Button
+    Friend WithEvents btnStockTracking As Button
+    Friend WithEvents btnProductHistory As Button
+    Friend WithEvents btnTrialBalance As Button
+    Friend WithEvents btnPurchaseOrder As Button
 End Class

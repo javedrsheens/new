@@ -367,37 +367,37 @@ Public Class frmMainDashboard
     ' NEW MODULE NAVIGATION
     ' ============================================
 
-    Public Sub OpenSalesReturn()
+    Private Sub btnSalesReturn_Click(sender As Object, e As EventArgs) Handles btnSalesReturn.Click
         Dim frmSR As New frmSalesReturn
         frmSR.CurrentUserID = CurrentUserID
         frmSR.ShowDialog()
         LoadDashboardData()
     End Sub
 
-    Public Sub OpenSubcategories()
+    Private Sub btnSubcategories_Click(sender As Object, e As EventArgs) Handles btnSubcategories.Click
         Dim frmSub As New frmSubcategories
         frmSub.ShowDialog()
     End Sub
 
-    Public Sub OpenStockTracking()
+    Private Sub btnStockTracking_Click(sender As Object, e As EventArgs) Handles btnStockTracking.Click
         Dim frmST As New frmStockTracking
         frmST.CurrentUserID = CurrentUserID
         frmST.ShowDialog()
     End Sub
 
-    Public Sub OpenProductHistory()
+    Private Sub btnProductHistory_Click(sender As Object, e As EventArgs) Handles btnProductHistory.Click
         Dim frmPH As New frmProductHistory
         frmPH.CurrentUserID = CurrentUserID
         frmPH.ShowDialog()
     End Sub
 
-    Public Sub OpenTrialBalance()
+    Private Sub btnTrialBalance_Click(sender As Object, e As EventArgs) Handles btnTrialBalance.Click
         Dim frmTB As New frmTrialBalance
         frmTB.CurrentUserID = CurrentUserID
         frmTB.ShowDialog()
     End Sub
 
-    Public Sub OpenPurchaseOrder()
+    Private Sub btnPurchaseOrder_Click(sender As Object, e As EventArgs) Handles btnPurchaseOrder.Click
         Dim frmPO As New frmPurchaseOrder
         frmPO.CurrentUserID = CurrentUserID
         frmPO.ShowDialog()
