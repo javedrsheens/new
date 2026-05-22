@@ -499,7 +499,128 @@ Public Class frmpurchasereturn
     End Sub
 
     Private Sub btnPrintBarcodes_Click(sender As Object, e As EventArgs) Handles btnPrintBarcodes.Click
-        MessageBox.Show("Barcode printing is not yet implemented.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information)
+        If returnTable.Rows.Count = 0 Then
+            MessageBox.Show("Add items to the return before printing barcodes.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            Return
+        End If
+
+        ' Collect label data from current return items
+        Dim labelItems As New List(Of String())()
+        For Each row As DataRow In returnTable.Rows
+            labelItems.Add(New String() {
+                row("ProductName").ToString(),
+                row("Barcode").ToString(),
+                Convert.ToDecimal(row("UnitPrice")).ToString("N2")
+            })
+        Next
+
+        Const LabelsPerPage As Integer = 10   ' 2 columns × 5 rows
+        Dim pageIndex As Integer = 0
+
+        Dim pd As New PrintDocument()
+        AddHandler pd.PrintPage,
+            Sub(s As Object, args As PrintPageEventArgs)
+                Dim lm As Single = args.MarginBounds.Left
+                Dim tm As Single = args.MarginBounds.Top
+                Dim colWidth As Single = args.MarginBounds.Width / 2
+                Dim labelWidth As Single = colWidth - 8
+                Dim labelHeight As Single = 95
+                Dim rowGap As Single = 10
+
+                Dim startIdx As Integer = pageIndex * LabelsPerPage
+                Dim printedOnPage As Integer = 0
+
+                Do While startIdx + printedOnPage < labelItems.Count AndAlso printedOnPage < LabelsPerPage
+                    Dim r As Integer = printedOnPage \ 2
+                    Dim c As Integer = printedOnPage Mod 2
+                    Dim lx As Single = lm + c * colWidth + 4
+                    Dim ly As Single = tm + r * (labelHeight + rowGap)
+                    Dim item = labelItems(startIdx + printedOnPage)
+                    DrawBarcodeLabel(args.Graphics, item(0), item(1), item(2), lx, ly, labelWidth, labelHeight)
+                    printedOnPage += 1
+                Loop
+
+                pageIndex += 1
+                args.HasMorePages = (pageIndex * LabelsPerPage) < labelItems.Count
+            End Sub
+
+        Dim preview As New PrintPreviewDialog()
+        preview.Width = 900
+        preview.Height = 700
+        preview.Document = pd
+        preview.ShowDialog()
+    End Sub
+
+    ''' <summary>Draws one barcode label box at the specified location.</summary>
+    Private Sub DrawBarcodeLabel(g As Graphics, productName As String, barcodeText As String, price As String,
+                                  x As Single, y As Single, w As Single, h As Single)
+        ' Border
+        g.DrawRectangle(Pens.Black, x, y, w, h)
+
+        ' Product name (bold, truncated)
+        Dim maxName As String = If(productName.Length > 38, productName.Substring(0, 38), productName)
+        Using nameFont As New Font("Segoe UI", 7, FontStyle.Bold)
+            g.DrawString(maxName, nameFont, Brushes.Black, New RectangleF(x + 3, y + 3, w - 6, 14))
+        End Using
+
+        ' Barcode bars
+        Dim barY As Single = y + 20
+        Dim barH As Single = h - 46
+        DrawBarcodeLines(g, barcodeText, x + 4, barY, w - 8, barH)
+
+        ' Barcode text centred below bars
+        Using codeFont As New Font("Courier New", 6.5F)
+            Dim sf As New StringFormat() With {.Alignment = StringAlignment.Center}
+            g.DrawString(barcodeText, codeFont, Brushes.Black,
+                         New RectangleF(x + 3, barY + barH + 2, w - 6, 12), sf)
+        End Using
+
+        ' Price right-aligned at bottom
+        Using priceFont As New Font("Segoe UI", 8, FontStyle.Bold)
+            Dim sf As New StringFormat() With {.Alignment = StringAlignment.Far}
+            g.DrawString($"Rs. {price}", priceFont, Brushes.Black,
+                         New RectangleF(x + 3, y + h - 16, w - 6, 14), sf)
+        End Using
+    End Sub
+
+    ''' <summary>
+    ''' Draws bar lines that represent the barcode value.
+    ''' Each character produces 7 alternating bar/space elements based on its
+    ''' lower 7 bits (1 = wide bar, 0 = narrow bar), giving a deterministic
+    ''' visual barcode suitable for internal label printing.
+    ''' </summary>
+    Private Sub DrawBarcodeLines(g As Graphics, barcodeText As String,
+                                  x As Single, y As Single, w As Single, h As Single)
+        If String.IsNullOrWhiteSpace(barcodeText) Then Return
+
+        ' Calculate total unit count to determine unit pixel width
+        Dim totalUnits As Integer = 0
+        For Each c As Char In barcodeText
+            Dim v As Integer = Asc(c) And &H7F
+            For bit As Integer = 6 To 0 Step -1
+                totalUnits += If(((v >> bit) And 1) = 1, 3, 1)
+            Next
+            totalUnits += 1   ' inter-character narrow gap
+        Next
+        If totalUnits = 0 Then Return
+
+        Dim unitPx As Single = w / totalUnits
+        Dim cx As Single = x
+
+        For Each c As Char In barcodeText
+            Dim v As Integer = Asc(c) And &H7F
+            Dim drawBar As Boolean = True
+            For bit As Integer = 6 To 0 Step -1
+                Dim isWide As Boolean = ((v >> bit) And 1) = 1
+                Dim bw As Single = If(isWide, unitPx * 3, unitPx)
+                If drawBar Then
+                    g.FillRectangle(Brushes.Black, cx, y, bw, h)
+                End If
+                cx += bw
+                drawBar = Not drawBar
+            Next
+            cx += unitPx   ' inter-character gap (always white)
+        Next
     End Sub
 
 #End Region
